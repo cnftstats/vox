@@ -239,6 +239,29 @@ datatable(X, class = 'compact stripe hover nowrap',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
+### Sweep that floor: Lowest jetpack listings
+```{r}
+X <- DT[asset_trait_jetpack != "jetpack_None"][order(price)][1:15]
+X[, img := sprintf('<img src="%s%d.png" class="img_html">', img_link, asset_number)]
+X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
+
+X <- X[, .(img, price, asset_rank, market)]
+
+
+datatable(X, class = 'compact stripe hover nowrap',
+          options = list(dom = "t",
+                         pageLength = 100,
+                         scrollY = '100%',
+                         bLengthChange = FALSE,
+                         bPaginate = FALSE,
+                         info = FALSE,
+                         columnDefs = list(list(className = 'dt-right', targets = "_all"))),
+          colnames = c("Asset", "Price", "Rank", "Market"),
+          rownames = FALSE,
+          escape = FALSE) %>%
+  formatStyle(columns = 1:ncol(X), fontSize = '90%')
+```
+
 > Click on the image to open the listing.
 
 # Rank {data-icon="fa-signal"}
@@ -248,7 +271,7 @@ datatable(X, class = 'compact stripe hover nowrap',
 min_x <- 1
 max_x <- RAR[, max(asset_rank)]
 min_y <- 0
-max_y <- max(DT[, quantile(price, probs = .90)], DTS[, max(price)])
+max_y <- max(DT[, quantile(price, probs = .95)], DTS[, max(price)])
 X <- DT[price <= max_y]
 scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
 scale_x[scale_x == 0] <- 1
@@ -256,8 +279,8 @@ scale_x[scale_x == 10000] <- 9999
 
 X[, img := sprintf("https://raw.githubusercontent.com/cnftstats/images/main/vox/vox%s_large.png", asset_number)]
 
-X[, has_jetpack := ifelse(asset_trait_jetpack %like% "None", "No jetpack", "Jetpack")]
-X[, has_jetpack := factor(has_jetpack, levels = c("Jetpack", "No jetpack"))]
+X[, has_jetpack := ifelse(asset_trait_jetpack %like% "None", "No", "Yes")]
+X[, has_jetpack := factor(has_jetpack, levels = c("Yes", "No"))]
 
 X[, asset_traits_nice := gsub(":", ": ", gsub(" — ", "</br>", asset_traits))]
 
@@ -279,8 +302,8 @@ gg <- ggplot(X, aes(asset_rank, price, color = has_jetpack, customdata = custom_
   geom_point(alpha = .6) +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0), limits = c(max_x, min_x)) +
   scale_y_continuous(n.breaks = 15, limits = c(min_y, max_y)) +
-  scale_color_manual(values = c("No jetpack" = "steelblue3", "Jetpack" = "steelblue4")) +
-  labs(x = "Rank", y = "Listing price", color = "Class") +
+  scale_color_manual(values = c("No" = "steelblue3", "Yes" = "steelblue4")) +
+  labs(x = "Rank", y = "Listing price", color = "Jetpack") +
   theme(legend.title = element_text(size = 10),
         legend.text = element_text(size = 9))
 
@@ -296,7 +319,7 @@ ggplotly(gg, tooltip = "text") %>%
 
 ### Sales x rank (last 24h)
 ```{r}
-max_y <- max(DT[, quantile(price, probs = .90)], DTS[, max(price)])
+max_y <- max(DT[, quantile(price, probs = .95)], DTS[, max(price)])
 X <- DTS[price <= max_y & trunc(sold_at_days) == 0]
 
 scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
@@ -305,8 +328,8 @@ scale_x[scale_x == 10000] <- 9999
 
 X[, img := sprintf("https://raw.githubusercontent.com/cnftstats/images/main/vox/vox%s_large.png", asset_number)]
 
-X[, has_jetpack := ifelse(asset_trait_jetpack %like% "None", "No jetpack", "Jetpack")]
-X[, has_jetpack := factor(has_jetpack, levels = c("Jetpack", "No jetpack"))]
+X[, has_jetpack := ifelse(asset_trait_jetpack %like% "None", "No", "Yes")]
+X[, has_jetpack := factor(has_jetpack, levels = c("Yes", "No"))]
 
 X[, asset_traits_nice := gsub(":", ": ", gsub(" — ", "</br>", asset_traits))]
 
@@ -328,8 +351,8 @@ gg <- ggplot(X, aes(asset_rank, price, color = has_jetpack, customdata = custom_
   geom_point(alpha = .6) +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0), limits = c(max_x, min_x)) +
   scale_y_continuous(n.breaks = 15, limits = c(min_y, max_y)) +
-  scale_color_manual(values = c("No jetpack" = "steelblue3", "Jetpack" = "steelblue4")) +
-  labs(x = "Rank", y = "Sales price", color = "Class") +
+  scale_color_manual(values = c("No" = "steelblue3", "Yes" = "steelblue4")) +
+  labs(x = "Rank", y = "Sales price", color = "Jetpack") +
   theme(legend.title = element_text(size = 10),
         legend.text = element_text(size = 9))
 
@@ -360,7 +383,7 @@ datatable(X, class = 'compact stripe hover',
                          bPaginate = FALSE,
                          info = FALSE,
                          columnDefs = list(list(className = 'dt-right', targets = "_all"))),
-          colnames = c("Rank range", "Asset", "Price", "Market"),
+          colnames = c("Rank range", "Asset", "Price", "Asset rank", "Market"),
           rownames = FALSE,
           escape = FALSE) %>%
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
