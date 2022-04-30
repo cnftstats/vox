@@ -271,7 +271,8 @@ datatable(X, class = 'compact stripe hover nowrap',
 min_x <- 1
 max_x <- RAR[, max(asset_rank)]
 min_y <- 0
-max_y <- max(DT[, quantile(price, probs = .95)], DTS[, max(price)])
+# max_y <- max(DT[, quantile(price, probs = .98)], DTS[, max(price)])
+max_y <- 40000
 X <- DT[price <= max_y]
 scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
 scale_x[scale_x == 0] <- 1
@@ -319,7 +320,6 @@ ggplotly(gg, tooltip = "text") %>%
 
 ### Sales x rank (last 24h)
 ```{r}
-max_y <- max(DT[, quantile(price, probs = .95)], DTS[, max(price)])
 X <- DTS[price <= max_y & trunc(sold_at_days) == 0]
 
 scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
