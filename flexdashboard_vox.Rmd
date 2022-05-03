@@ -91,6 +91,24 @@ $(document).ready(function(){
 
 # Floor {data-icon="ion-arrow-graph-up-right"}
 ## Column 1 {data-width=700 .tabset}
+<!-- ### Listings test -->
+<!-- ```{r, fig.width=9, fig.height=7} -->
+<!-- X <- copy(DT) -->
+<!-- X <- X[order(price)][1:100] -->
+<!-- X[, cnft := 1:nrow(X)] -->
+<!-- min_y <- min(X$price) - min(X$price)*.01 -->
+<!-- max_y <- max(X$price) + min(X$price)*.01 -->
+
+<!-- ggplot(X, aes(cnft, price)) + -->
+<!--   geom_point(color = "steelblue3", size = 2) + -->
+<!--   # geom_line(color = "steelblue3", size = 1) + -->
+<!--   # geom_ribbon(aes(ymin = min_y, ymax = price), fill = "steelblue3", alpha = .5) + -->
+<!--   scale_y_continuous(n.breaks = 10, expand = c(0, 0)) + -->
+<!--   scale_x_continuous(breaks = c(1, seq(10, 90, 10), 100), expand = c(.03, .03)) + -->
+<!--   coord_cartesian(ylim = c(min_y, max_y)) + -->
+<!--   labs(y = "Listing price", x = "100 cheapest assets") -->
+<!-- ``` -->
+
 ### Listings
 ```{r, fig.width=9, fig.height=7}
 # Is there enough data?
@@ -272,8 +290,7 @@ datatable(X, class = 'compact stripe hover nowrap',
 min_x <- 1
 max_x <- RAR[, max(asset_rank)]
 min_y <- 0
-# max_y <- max(DT[, quantile(price, probs = .98)], DTS[, max(price)])
-max_y <- 40000
+max_y <- max(DT[, quantile(price, probs = .98)], DTS[, max(price)])
 X <- DT[price <= max_y]
 scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
 scale_x[scale_x == 0] <- 1
