@@ -91,23 +91,49 @@ $(document).ready(function(){
 
 # Floor {data-icon="ion-arrow-graph-up-right"}
 ## Column 1 {data-width=700 .tabset}
-<!-- ### Listings test -->
-<!-- ```{r, fig.width=9, fig.height=7} -->
-<!-- X <- copy(DT) -->
-<!-- X <- X[order(price)][1:100] -->
-<!-- X[, cnft := 1:nrow(X)] -->
-<!-- min_y <- min(X$price) - min(X$price)*.01 -->
-<!-- max_y <- max(X$price) + min(X$price)*.01 -->
+### Listings test
+```{r, fig.width=9, fig.height=7}
+X <- copy(DT)
+X <- X[order(price)][1:100]
+X[, cnft := 1:nrow(X)]
 
-<!-- ggplot(X, aes(cnft, price)) + -->
-<!--   geom_point(color = "steelblue3", size = 2) + -->
-<!--   # geom_line(color = "steelblue3", size = 1) + -->
-<!--   # geom_ribbon(aes(ymin = min_y, ymax = price), fill = "steelblue3", alpha = .5) + -->
-<!--   scale_y_continuous(n.breaks = 10, expand = c(0, 0)) + -->
-<!--   scale_x_continuous(breaks = c(1, seq(10, 90, 10), 100), expand = c(.03, .03)) + -->
-<!--   coord_cartesian(ylim = c(min_y, max_y)) + -->
-<!--   labs(y = "Listing price", x = "100 cheapest assets") -->
-<!-- ``` -->
+X[, img := sprintf("https://raw.githubusercontent.com/cnftstats/images/main/vox/vox%s_large.png", asset_number)]
+
+X[, asset_traits_nice := gsub(":", ": ", gsub(" — ", "</br>", asset_traits))]
+
+X[, custom_data := sprintf('{
+"mytooltip":"<div id=\'tooltip\' style=\'color:#9e9e9e; font-size:13px; background-color:white\'>
+              <img src=\'%s\' width=190></img>
+              </br><span style=\'color:#7d188f\'><b>%s</b></span>
+              </br><b>%.0f ada</b>
+              </br>Rank: %s
+              </br></br>%s
+             </div>",
+"market_link":"%s"
+}', img, asset, price, asset_rank, asset_traits_nice, link) %>% gsub("\n", "", .)]
+
+min_y <- min(X$price) - min(X$price)*.01
+max_y <- max(X$price) + min(X$price)*.01
+
+gg <- ggplot(X, aes(cnft, price, customdata = custom_data,
+                    text = paste0(asset,
+                                  "</br></br>", paste("Price:", round(price, 0),
+                                                      "</br>Rank:", asset_rank)))) +
+  geom_point(color = "steelblue3", size = 2) +
+  # geom_line(color = "steelblue3", size = 1) +s
+  # geom_ribbon(aes(ymin = min_y, ymax = price), fill = "steelblue3", alpha = .5) +
+  scale_y_continuous(n.breaks = 10, expand = c(0, 0)) +
+  scale_x_continuous(breaks = c(1, seq(10, 90, 10), 100), expand = c(.03, .03)) +
+  coord_cartesian(ylim = c(min_y, max_y)) +
+  labs(y = "Listing price", x = "100 cheapest assets")
+
+ggplotly(gg, tooltip = "text") %>% 
+  layout(legend = list(x = 1, y = 0, bgcolor = 'rgba(255,255,255,0.6)'),
+         margin = list(r = 200)) %>%
+  config(scrollZoom = TRUE, displaylogo = FALSE) %>% 
+  onRender(readLines("hover_tooltip.js"))
+
+```
 
 ### Listings
 ```{r, fig.width=9, fig.height=7}
@@ -154,16 +180,14 @@ X[price_range >= 10000,                x_label := "10000+"]
 
 .X <- X[, .(price_range, x_label)] %>% unique %>% .[order(price_range)]
 X[, x_label := factor(x_label, levels = .X$x_label)]
-X[, market  := factor(market, levels = c("jpg.store", "cnft.io"))]
 
-ggplot(X, aes(x_label, N, fill = market, alpha = data_when)) +
+ggplot(X, aes(x_label, N, alpha = data_when)) +
   facet_grid(data_when~.) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", fill = "steelblue4") +
   geom_text(aes(label = stat(y), group = x_label),
             stat = 'summary', fun = sum, vjust = -.5, hjust = +.55,
             color = "steelblue4", size = 3) +
   scale_y_continuous(expand = expansion(mult = c(0, .1))) +
-  scale_fill_manual(values = c("jpg.store" = "steelblue3", "cnft.io" = "steelblue4")) +
   scale_alpha_manual(values = c(0.9, 0.7), guide = "none") +
   labs(x = "Price range", y = "Number of listings", fill = "", caption = .caption) +
   theme(axis.text.x = element_text(angle = -45, vjust = +.5, hjust = 0,
@@ -206,17 +230,15 @@ X[price_range >= 10000,                x_label := "10000+"]
 
 .X <- X[, .(price_range, x_label)] %>% unique %>% .[order(price_range)]
 X[, x_label := factor(x_label, levels = .X$x_label)]
-X[, market := factor(market, levels = c("jpg.store", "cnft.io"))]
 
-ggplot(X, aes(x_label, N, fill = market, alpha = sold_time)) +
+ggplot(X, aes(x_label, N, alpha = sold_time)) +
   facet_grid(sold_time~.) +
   geom_hline(yintercept = 0, color = "grey70") +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", fill = "springgreen4") +
   geom_text(aes(label = stat(y), group = x_label),
             stat = 'summary', fun = sum, vjust = -.5, hjust = +.55,
             color = "springgreen4", size = 3) +
   scale_y_continuous(expand = expansion(mult = c(0, .1))) +
-  scale_fill_manual(values = c("jpg.store" = "springgreen3", "cnft.io" = "springgreen4")) +
   scale_alpha_manual(values = c("0-24h ago" = .9, "24-48h ago" = .8, "48-72h ago" = .7), guide = "none") +
   labs(x = "Price range", y = "Number of sales", fill = "",
        caption = .caption) +
