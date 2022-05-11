@@ -91,7 +91,7 @@ $(document).ready(function(){
 
 # Floor {data-icon="ion-arrow-graph-up-right"}
 ## Column 1 {data-width=700 .tabset}
-### Listings test
+### Listings staircase
 ```{r, fig.width=9, fig.height=7}
 X <- copy(DT)
 X <- X[order(price)][1:100]
@@ -132,7 +132,6 @@ ggplotly(gg, tooltip = "text") %>%
          margin = list(r = 200)) %>%
   config(scrollZoom = TRUE, displaylogo = FALSE) %>% 
   onRender(readLines("hover_tooltip.js"))
-
 ```
 
 ### Listings
