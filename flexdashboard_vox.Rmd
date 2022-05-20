@@ -83,6 +83,7 @@ $(document).ready(function(){
 <li><a href="https://cnftstats.github.io/chilledkongs">ChilledKongs</a></li>
 <li><a href="https://cnftstats.github.io/claynation">Clay Nation</a></li>
 <li><a href="https://cnftstats.github.io/discosolaris">DiscoSolaris</a></li>
+<li><a href="https://cnftstats.github.io/lazyllamas">LazyLlamas</a></li>
 <li><a href="https://cnftstats.github.io/mocossi">Mocossi</a></li>
 <li><a href="https://cnftstats.github.io/pavia">Pavia</a></li>
 <li><a href="https://cnftstats.github.io/spacebudz">SpaceBudz</a></li>
@@ -435,7 +436,7 @@ datatable(X, class = 'compact stripe hover',
 ### Floor listings by trait
 ```{r}
 X <- DTL[, .SD[price == min(price)], .(trait_category, trait)][order(trait_category, trait)]
-X[, img := sprintf('<img src="%s%s.png" class="img_html">', img_link, asset_number)]
+X[, img := sprintf('<img src="%s%s.png" class="img_html">', img_link, asset_id)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
 X <- X[, .(trait_category, trait, img, price, asset_rank, market, asset_traits)]
